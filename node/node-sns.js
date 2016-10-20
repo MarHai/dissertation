@@ -47,22 +47,24 @@ oRest.get('sns', function(_aData) {
                                 _oPost.nSnsId = _oSns.nSnsId;
                                 nToBeDone++;
                                 oRest.post('post', _oPost, function(_aPostWithId) {
-                                    if(Array.isArray(_aPostWithId)) {
+                                    var oPost = _aPostWithId;
+                                    if(typeof(_aPostWithId[0]) !== 'undefined' && typeof(_aPostWithId[0]['nPosId']) !== 'undefined') {
+                                        oPost = _aPostWithId[0]
+                                    }
+                                    if(if(typeof(oPost['nPosId']) !== 'undefined') {
                                         /**
-                                         * create link(s) between post and article (if necessary)
+                                         * create link between post and article (if necessary)
                                          * */
-                                        if(_aPostWithId.length > 0) {
-                                            var oTweet = JSON.parse(_aPostWithId[0].sPostMeta);
-                                            if(typeof(oTweet.entities.urls) !== 'undefined' && oTweet.entities.urls.length > 0) {
-                                                oTweet.entities.urls.forEach(function(_oUrl, k) {
-                                                    nToBeDone++;
-                                                    oRest.post('url/post', { nPosId: _aPostWithId[0].nPosId, sUrl: _oUrl.expanded_url, nMedId: _oSns.nMedId, dCreate: _oPost.dCreate },
-                                                               function(_aMention) {
+                                        var oTweet = JSON.parse(_aPostWithId[0].sPostMeta);
+                                        if(typeof(oTweet.entities.urls) !== 'undefined' && oTweet.entities.urls.length > 0) {
+                                            oTweet.entities.urls.forEach(function(_oUrl, k) {
+                                                nToBeDone++;
+                                                oRest.post('url/post', { nPosId: oPost.nPosId, sUrl: _oUrl.expanded_url, nMedId: _oSns.nMedId, dCreate: _oPost.dCreate },
+                                                           function(_aMention) {
 
-                                                        done();
-                                                    });
+                                                    done();
                                                 });
-                                            }
+                                            });
                                         }
                                     }
                                     done();
@@ -102,17 +104,19 @@ oRest.get('sns', function(_aData) {
                                                     shares: _oPost.shares
                                                 })
                                             }, function(_aPostWithId) {
-
-                                            if(Array.isArray(_aPostWithId)) {
+                                            
+                                            var oPost = _aPostWithId;
+                                            if(typeof(_aPostWithId[0]) !== 'undefined' && typeof(_aPostWithId[0]['nPosId']) !== 'undefined') {
+                                                oPost = _aPostWithId[0]
+                                            }
+                                            if(if(typeof(oPost['nPosId']) !== 'undefined') {
                                                 /**
                                                  * create link between post and article (if necessary)
                                                  * */
-                                                if(_aPostWithId.length > 0) {
-                                                    nToBeDone++;
-                                                    oRest.post('url/post', { nPosId: _aPostWithId[0].nPosId, sUrl: _oPost.link, nMedId: _oSns.nMedId, dCreate: _oPost.dCreate }, function(_aMention) {
-                                                        done();
-                                                    });
-                                                }
+                                                nToBeDone++;
+                                                oRest.post('url/post', { nPosId: oPost.nPosId, sUrl: _oPost.link, nMedId: _oSns.nMedId, dCreate: _oPost.dCreate }, function(_aMention) {
+                                                    done();
+                                                });
                                             }
                                             done();
                                         });

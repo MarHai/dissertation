@@ -102,10 +102,10 @@ CREATE TABLE IF NOT EXISTS `post` (
   `sPostId` varchar(100) NOT NULL,
   `sPost` text NOT NULL,
   `sPostMeta` text NOT NULL,
+  `bThoroughlyCheckedForMentions` tinyint(2) unsigned NOT NULL DEFAULT '0',
   `dCreate` int(35) unsigned NOT NULL,
   PRIMARY KEY (`nPosId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
 
 
 CREATE TABLE IF NOT EXISTS `post_mention` (

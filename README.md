@@ -17,5 +17,5 @@ Run `npm install`, `bower install`, and `gulp`. Deploy all files within `dist/` 
 Needs the REST address set.
 
 ## Monitoring
-Single scripts (called through cronjobs) to maintain data integrity and security. Includes regular backups of the database as well as status-information emails.
-This is really boring PHP. Just push to a server, configure the REST address, database-connection settings, and the administrator's password hash, and put both `status.php` and `backup.php` (with write permissions set) into cronjob loops.
+Single scripts (called through cronjobs) to maintain data integrity and security. Includes regular backups of the database (`backup.php`), post-hoc integrity checks for the mentioning of articles within social-network-site posts (`mentions.php`), as well as status-information emails (`status.php`).
+This is really boring PHP. Just push to a server, configure the REST address, database-connection settings, and the administrator's password hash, and put all three files (with write permissions set for `backup.php`) into cronjob loops. Meaningful intervals include a daily backup, an hourly integrity check, and a status check every 5-8 minutes.
