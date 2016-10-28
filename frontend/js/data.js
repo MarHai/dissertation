@@ -317,11 +317,19 @@ function data_sns__(_nId, _fCallback) {
         $('#page_data-sns-- h1.page-header')
             .text(_oData.sns.sPlatformName + ' (' + _oData.sns.eType + ') for ' + _oData.media.sName);
         for(var i = 0; i < _oData.post.length; i++) {
-            _oData.post[i]['dCreate'] = moment.unix(_oData.post[i]['dCreate']).format('YYYY-MM-DD HH:mm');
+            var oMoment = moment.unix(_oData.post[i]['dCreate']);
+            _oData.post[i]['dCreateDay'] = oMoment.format('YYYY-MM-DD');
+            _oData.post[i]['dCreate'] = oMoment.format('YYYY-MM-DD HH:mm');
         }
         multiplyTemplate($('#page_data-sns-- tr.template'), _oData.post);
         
+        var oDateCount = {};
         $.each(_oData.post, function(i, _oPost) {
+            if(typeof(oDateCount[_oPost.dCreateDay]) == 'undefined') {
+                oDateCount[_oPost.dCreateDay] = 1;
+            } else {
+                oDateCount[_oPost.dCreateDay]++;
+            }
             restGET('post/' + _oPost.nPosId, (function(_i) { return function(_oPostDetail) {
                 multiplyTemplate($($('#page_data-sns-- tr.template-copy li.template').get(_i)), _oPostDetail.post_mention);
                 
@@ -335,6 +343,33 @@ function data_sns__(_nId, _fCallback) {
             }})(i));
         });
         
+        var aDateCount = [];
+        $.each(oDateCount, function(_sDate, _nCount) {
+            aDateCount.push({ sDate: _sDate, nCount: _nCount });
+        });
+        aDateCount.sort(function(_a, _b) {
+            if(_a.sDate < _b.sDate) return -1;
+            else if(_a.sDate > _b.sDate) return 1;
+            else return 0;
+        });
+        multiplyTemplate($('#page_data-sns-- ul.dropdown-menu li.template'), aDateCount);
+        $('#page_data-sns-- ul.dropdown-menu li:not(.template) a.filterdate[data-date]').off('click').on('click', function(_oEvent) {
+            _oEvent.preventDefault();
+            var sDateFiltered = $(this).data('date');
+            $('#page_data-sns-- tbody tr:not(.template)').each(function(i, _oElem) {
+                if($(_oElem).children('td.fixedwidth').data('date') == sDateFiltered) {
+                    $(_oElem).show();
+                } else {
+                    $(_oElem).hide();
+                }
+            });
+            $(this).parents('ul').prev().removeClass('btn-info').addClass('btn-warning').children('span.filtertext').text(': ' + sDateFiltered);
+        });
+        $('#page_data-sns-- ul.dropdown-menu li:not(.template) a.unfilter').off('click').on('click', function(_oEvent) {
+            _oEvent.preventDefault();
+            $(this).parents('ul').prev().removeClass('btn-warning').addClass('btn-info').children('span.filtertext').text('');
+            $('#page_data-sns-- tbody tr:not(.template)').show();
+        });
         _fCallback();
     });
 }
@@ -397,13 +432,14 @@ function data_article__(_nId, _fCallback) {
         $.each(_oArticle.post_mention, function(i, _oMention) {
             aDevelopment.push({
                 nDevelopment: _oMention['dCreate'],
-                dDevelopment: moment.unix(_oMention['dCreate']).format('YYYY-MM-DD HH:mm'),
+                dDevelopment: '<span class="dCreate" data-id="' + _oMention['nPosId'] + '">' + moment.unix(_oMention['dCreate']).format('YYYY-MM-DD HH:mm') + '</span>',
                 eDevelopment: 'mentioned on <span class="sSns" data-id="' + _oMention['nPosId'] + '"></span>',
                 sDevelopment: '<span class="sPost" data-id="' + _oMention['nPosId'] + '"></span>',
                 sImage: null,
                 bIsImage: '0'
             });
             restGET('post/' + _oMention['nPosId'], function(_oPost) {
+                $('#page_data-article-- .panel tr.template-copy .dCreate[data-id="' + _oPost.post.nPosId + '"]').text(moment.unix(_oPost.post.dCreate).format('YYYY-MM-DD HH:mm'));
                 $('#page_data-article-- .panel tr.template-copy .sPost[data-id="' + _oPost.post.nPosId + '"]').text(_oPost.post.sPost);
                 $('#page_data-article-- .panel tr.template-copy .sSns[data-id="' + _oPost.post.nPosId + '"]').text(_oPost.sns.sPlatformName + ' (' + _oPost.sns.eType + ')');
             });

@@ -244,6 +244,18 @@
         <!-- DATA: single sns view -->
         <div class="container" id="page_data-sns--">
             <h1 class="page-header"></h1>
+            <div class="row">
+                <div class="btn-group pull-right">
+                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Filter posts to a given date<span class="filtertext"></span> <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li class="template"><a href="#" class="filterdate" data-date="{{sDate}}">{{sDate}} ({{nCount}} posts)</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#" class="unfilter">Clear filter</a></li>
+                    </ul>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped table-condensed">
                     <thead>
@@ -255,7 +267,7 @@
                     </thead>
                     <tbody>
                         <tr class="template">
-                            <td class="fixedwidth">{{sPost}}</td>
+                            <td class="fixedwidth" data-date="{{dCreateDay}}">{{sPost}}</td>
                             <td>{{dCreate}}</td>
                             <td>
                                 <ul class="nav nav-pills nav-stacked">
