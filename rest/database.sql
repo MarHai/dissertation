@@ -8,18 +8,19 @@ CREATE TABLE IF NOT EXISTS `article` (
   `nMedId` int(11) unsigned NOT NULL,
   `sUrl` text NOT NULL,
   `dCreate` int(35) unsigned NOT NULL,
-  PRIMARY KEY (`nArtId`)
+  PRIMARY KEY (`nArtId`),
+  KEY `nMedId` (`nMedId`),
+  FULLTEXT KEY `sUrl` (`sUrl`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
 
 
 CREATE TABLE IF NOT EXISTS `highlight` (
   `nHigId` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `nMedId` int(11) unsigned NOT NULL,
   `dCreate` int(35) unsigned NOT NULL,
-  PRIMARY KEY (`nHigId`)
+  PRIMARY KEY (`nHigId`),
+  KEY `nMedId` (`nMedId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
-
 
 
 CREATE TABLE IF NOT EXISTS `highlight_ranking` (
@@ -28,18 +29,19 @@ CREATE TABLE IF NOT EXISTS `highlight_ranking` (
   `nHigId` int(11) unsigned NOT NULL,
   `nValue` int(35) unsigned NOT NULL,
   `dCreate` int(35) unsigned NOT NULL,
-  PRIMARY KEY (`nHiRId`)
+  PRIMARY KEY (`nHiRId`),
+  KEY `nArtId` (`nArtId`),
+  KEY `nHigId` (`nHigId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-
 
 
 CREATE TABLE IF NOT EXISTS `homepage` (
   `nHomId` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `nMedId` int(11) unsigned NOT NULL,
   `dCreate` int(35) unsigned NOT NULL,
-  PRIMARY KEY (`nHomId`)
+  PRIMARY KEY (`nHomId`),
+  KEY `nMedId` (`nMedId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
 
 
 CREATE TABLE IF NOT EXISTS `homepage_ranking` (
@@ -48,9 +50,10 @@ CREATE TABLE IF NOT EXISTS `homepage_ranking` (
   `nHomId` int(11) unsigned NOT NULL,
   `nValue` int(35) unsigned NOT NULL,
   `dCreate` int(35) unsigned NOT NULL,
-  PRIMARY KEY (`nHoRId`)
+  PRIMARY KEY (`nHoRId`),
+  KEY `nArtId` (`nArtId`),
+  KEY `nHomId` (`nHomId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-
 
 
 CREATE TABLE IF NOT EXISTS `media` (
@@ -74,15 +77,14 @@ CREATE TABLE IF NOT EXISTS `media` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
-
 CREATE TABLE IF NOT EXISTS `ping` (
   `nPinId` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `sSource` varchar(50) NOT NULL,
   `dCreate` int(35) unsigned NOT NULL,
   `nTime` int(11) unsigned NOT NULL,
-  PRIMARY KEY (`nPinId`)
+  PRIMARY KEY (`nPinId`),
+  KEY `sSource` (`sSource`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
 
 
 CREATE TABLE IF NOT EXISTS `popularity` (
@@ -91,9 +93,11 @@ CREATE TABLE IF NOT EXISTS `popularity` (
   `sType` varchar(50) NOT NULL,
   `nValue` int(35) unsigned NOT NULL,
   `dCreate` int(35) unsigned NOT NULL,
-  PRIMARY KEY (`nPopId`)
+  PRIMARY KEY (`nPopId`),
+  KEY `sType` (`sType`),
+  KEY `nArtId` (`nArtId`),
+  KEY `nArtId_sType` (`nArtId`,`sType`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
 
 
 CREATE TABLE IF NOT EXISTS `post` (
@@ -104,7 +108,8 @@ CREATE TABLE IF NOT EXISTS `post` (
   `sPostMeta` text NOT NULL,
   `bThoroughlyCheckedForMentions` tinyint(2) unsigned NOT NULL DEFAULT '0',
   `dCreate` int(35) unsigned NOT NULL,
-  PRIMARY KEY (`nPosId`)
+  PRIMARY KEY (`nPosId`),
+  KEY `nSnsId` (`nSnsId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
@@ -113,9 +118,9 @@ CREATE TABLE IF NOT EXISTS `post_mention` (
   `nArtId` int(11) unsigned NOT NULL,
   `nPosId` int(11) unsigned NOT NULL,
   `dCreate` int(35) unsigned NOT NULL,
-  PRIMARY KEY (`nPoMId`)
+  PRIMARY KEY (`nPoMId`),
+  KEY `nArtId` (`nArtId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-
 
 
 CREATE TABLE IF NOT EXISTS `sns` (
@@ -130,7 +135,6 @@ CREATE TABLE IF NOT EXISTS `sns` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
-
 CREATE TABLE IF NOT EXISTS `update` (
   `nUpdId` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `nArtId` int(11) unsigned NOT NULL DEFAULT '0',
@@ -138,7 +142,9 @@ CREATE TABLE IF NOT EXISTS `update` (
   `sValue` text NOT NULL,
   `sImageHash` varchar(50) NOT NULL,
   `dCreate` int(35) unsigned NOT NULL,
-  PRIMARY KEY (`nUpdId`)
+  PRIMARY KEY (`nUpdId`),
+  KEY `sType` (`sType`),
+  KEY `nArtId_sType` (`nArtId`,`sType`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
