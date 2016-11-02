@@ -185,15 +185,18 @@ $oApp->post('/{sTable}', function($_oRequest, Psr\Http\Message\ResponseInterface
         $sTable = addslashes(trim($_aArg['sTable']));
         $sPrimary = extractPrimaryKey($sTable);
         $aColumn = getColumnNames($sTable);
-        //in order to check if all fields are filled in, count the columns (-primary, -update)
+        //in order to check if all fields are filled in, count the columns (-primary, -update, -bThoroughlyCheckedForMentions)
         $nColumnsToFill = count($aColumn) - 1;
         if(in_array('dUpdate', $aColumn)) {
+            $nColumnsToFill--;
+        }
+        if(in_array('bThoroughlyCheckedForMentions', $aColumn)) {
             $nColumnsToFill--;
         }
         //now fill aSet (which can later be compared with nColumnsToFill)
         $aSet = [ 'dCreate' => time() ];
         foreach($_oRequest->getParsedBody() as $sInsertKey => $mValue) {
-            if(in_array($sInsertKey, getColumnNames($sTable)) && !in_array($sInsertKey, [ $sPrimary, 'dUpdate' ])) {
+            if(in_array($sInsertKey, getColumnNames($sTable)) && !in_array($sInsertKey, [ $sPrimary, 'dUpdate', 'bThoroughlyCheckedForMentions' ])) {
                 $aSet[$sInsertKey] = prepareInput($sInsertKey, $mValue);
             }
         }

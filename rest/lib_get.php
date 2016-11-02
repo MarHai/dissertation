@@ -5,6 +5,7 @@
  * - latest
  * - find/{sQuery}
  * - ping
+ * - mention/{nUid} setup mentions post-hoc for given nSnsId and return mentions
  * + list all from one table
  *   - media
  *   - sns
@@ -67,12 +68,12 @@ $oApp->get('/find/{sQuery}', function($_oRequest, Psr\Http\Message\ResponseInter
 
 
 /**
- * Search for all kinds of data (everywhere, basically, where full-text search makes sense).
+ * Get statistical information about PINGs. Incluces the latest ping, overall count of pings, mean and SD ping time (per ping type).
  * */
 $oApp->get('/ping', function($_oRequest, Psr\Http\Message\ResponseInterface $_oResponse, array $_aArg) {
     if(login($_oRequest)) {
         $aData = [];
-        if(($oResult = query('SELECT a.*, COUNT(c.nPinId) AS nCount, ROUND(AVG(c.nTime)) AS nMean
+        if(($oResult = query('SELECT a.*, COUNT(c.nPinId) AS nCount, ROUND(AVG(c.nTime)) AS nMean, ROUND(STDDEV(c.nTime)) AS nStdDev
                               FROM `ping` a
                                 LEFT JOIN `ping` b ON a.dCreate < b.dCreate AND a.sSource = b.sSource
                                 LEFT JOIN `ping` c ON a.sSource = c.sSource
@@ -81,6 +82,36 @@ $oApp->get('/ping', function($_oRequest, Psr\Http\Message\ResponseInterface $_oR
             if($oResult->num_rows > 0) {
                 while(($aRow = $oResult->fetch_assoc())) {
                     $aData[$aRow['sSource']] = $aRow;
+                }
+            }
+        }
+        return $_oResponse->write(json($aData));
+    }
+    return $_oResponse->withStatus(405)->write('Method not allowed.');
+});
+
+
+
+/**
+ * Get statistical information about latest fetches and the like.
+ * */
+$oApp->get('/status', function($_oRequest, Psr\Http\Message\ResponseInterface $_oResponse, array $_aArg) {
+    if(login($_oRequest)) {
+        $aData = [];
+        foreach([ 'homepage', 'highlight', 'article' ] as $sType) {
+            $aData[$sType] = [];
+            $sPrimary = extractPrimaryKey($sType);
+            if(($oResult = query('SELECT m.sName, a.'.$sPrimary.', a.dCreate AS dLatest, COUNT(c.'.$sPrimary.') AS nCount
+                                 FROM `'.$sType.'` a
+                                     LEFT JOIN `'.$sType.'` b ON a.dCreate < b.dCreate AND a.nMedId = b.nMedId
+                                     LEFT JOIN `'.$sType.'` c ON a.nMedId = c.nMedId,
+                                   `media` m
+                                 WHERE b.'.$sPrimary.' IS NULL AND a.nMedId = m.nMedId
+                                 GROUP BY a.nMedId'))) {
+                if($oResult->num_rows > 0) {
+                    while(($aRow = $oResult->fetch_assoc())) {
+                        $aData[$sType][$aRow['sName']] = $aRow;
+                    }
                 }
             }
         }
