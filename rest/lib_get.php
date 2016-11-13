@@ -73,15 +73,22 @@ $oApp->get('/find/{sQuery}', function($_oRequest, Psr\Http\Message\ResponseInter
 $oApp->get('/ping', function($_oRequest, Psr\Http\Message\ResponseInterface $_oResponse, array $_aArg) {
     if(login($_oRequest)) {
         $aData = [];
-        if(($oResult = query('SELECT a.*, COUNT(c.nPinId) AS nCount, ROUND(AVG(c.nTime)) AS nMean, ROUND(STDDEV(c.nTime)) AS nStdDev
-                              FROM `ping` a
-                                LEFT JOIN `ping` b ON a.dCreate < b.dCreate AND a.sSource = b.sSource
-                                LEFT JOIN `ping` c ON a.sSource = c.sSource
-                              WHERE b.nPinId IS NULL
-                              GROUP BY a.sSource'))) {
-            if($oResult->num_rows > 0) {
-                while(($aRow = $oResult->fetch_assoc())) {
-                    $aData[$aRow['sSource']] = $aRow;
+        if(($oResultOverall = query('SELECT sSource, COUNT(nPinId) AS nCount, ROUND(AVG(nTime)) AS nMean, ROUND(STDDEV(nTime)) AS nStdDev
+                                     FROM `ping`
+                                     GROUP BY sSource'))) {
+            
+            if($oResultOverall->num_rows > 0) {
+                while(($aRowOverall = $oResultOverall->fetch_assoc())) {
+                    if(($oResultSingle = query(sprintf('SELECT * FROM `ping` WHERE sSource = \'%s\' ORDER BY nPinId DESC LIMIT 1',
+                                                       $aRowOverall['sSource'])
+                                              ))) {
+                        
+                        if($oResultSingle->num_rows > 0) {
+                            while(($aRow = $oResultSingle->fetch_assoc())) {
+                                $aData[$aRow['sSource']] = array_merge($aRow, $aRowOverall);
+                            }
+                        }
+                    }
                 }
             }
         }
