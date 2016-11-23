@@ -108,13 +108,10 @@ $oApp->get('/status', function($_oRequest, Psr\Http\Message\ResponseInterface $_
         foreach([ 'homepage', 'highlight', 'article' ] as $sType) {
             $aData[$sType] = [];
             $sPrimary = extractPrimaryKey($sType);
-            if(($oResult = query('SELECT m.sName, a.'.$sPrimary.', a.dCreate AS dLatest, COUNT(c.'.$sPrimary.') AS nCount
-                                 FROM `'.$sType.'` a
-                                     LEFT JOIN `'.$sType.'` b ON a.dCreate < b.dCreate AND a.nMedId = b.nMedId
-                                     LEFT JOIN `'.$sType.'` c ON a.nMedId = c.nMedId,
-                                   `media` m
-                                 WHERE b.'.$sPrimary.' IS NULL AND a.nMedId = m.nMedId
-                                 GROUP BY a.nMedId'))) {
+            if(($oResult = query('SELECT b.sName, MAX(a.'.$sPrimary.') AS '.$sPrimary.', MAX(a.dCreate) AS dLatest, COUNT(a.'.$sPrimary.') AS nCount
+                                  FROM `'.$sType.'` a, `media` b
+                                  WHERE a.nMedId = b.nMedId
+                                  GROUP BY a.nMedId'))) {
                 if($oResult->num_rows > 0) {
                     while(($aRow = $oResult->fetch_assoc())) {
                         $aData[$sType][$aRow['sName']] = $aRow;
