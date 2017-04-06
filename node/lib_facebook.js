@@ -122,12 +122,16 @@ module.exports = {
                                 if(typeof(_oData.share) === 'undefined') {
                                     _fCallback(null);
                                 } else {
-                                    _fCallback({
-                                        id: _oData.og_object.id,
-                                        url: _oData.og_object.url,
-                                        'FB Comments': parseInt(_oData.share.comment_count),
-                                        'FB Shares': parseInt(_oData.share.share_count)
-                                    });
+                                    if(typeof(_oData.og_object) === 'undefined' || typeof(_oData.og_object.id) === 'undefined') {
+                                        _fCallback(null);
+                                    } else {
+                                        _fCallback({
+                                            id: _oData.og_object.id,
+                                            url: _oData.og_object.url,
+                                            'FB Comments': parseInt(_oData.share.comment_count),
+                                            'FB Shares': parseInt(_oData.share.share_count)
+                                        });
+                                    }
                                 }
                             });
                         }
